@@ -1,0 +1,36 @@
+@layer base {
+  body {
+    font-family: 'Hind Siliguri', 'Plus Jakarta Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.font-bangla {
+  font-family: 'Hind Siliguri', sans-serif;
+}
+
+/* Custom theme accents */
+.theme-emerald {
+  --color-primary: #059669;
+}
+
+.theme-midnight {
+  --color-primary: #4f46e5;
+}
+
+.theme-titanium {
+  --color-primary: #475569;
+}
+
+.theme-amber {
+  --color-primary: #d97706;
+}
+
+/* Hide scrollbar for tabs */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
