@@ -22,6 +22,7 @@ import { FamilyLockerView } from './components/FamilyLockerView';
 import { ShowcaseHero } from './components/ShowcaseHero';
 import { GoogleDriveExplorer } from './components/GoogleDriveExplorer';
 import { GeniusHelpingManager } from './components/GeniusHelpingManager';
+import { WorldNewsTicker } from './components/WorldNewsTicker';
 import { AIAdvisorChat } from './components/AIAdvisorChat';
 import { HotlinesView } from './components/HotlinesView';
 import { AILabView } from './components/AILabView';
@@ -565,11 +566,40 @@ const App: React.FC = () => {
           setEditingMember(currentUser);
           setShowEditProfileModal(true);
         }}
+        isDriveConnected={isDriveConnected}
+        onOpenGoogleDrive={() => setShowGoogleDriveModal(true)}
+        onOpenGeniusManager={() => setShowGeniusManagerModal(true)}
       />
 
       {/* Main Content View Container */}
       <main className="flex-1 container mx-auto px-4 py-6 max-w-7xl">
         
+        {/* Active Member Personalized Showcase Hero & Quick Launcher */}
+        <div className="mb-6">
+          <ShowcaseHero
+            currentUser={currentUser}
+            lang={lang}
+            isBiometricUnlocked={isBiometricUnlocked}
+            isDriveConnected={isDriveConnected}
+            driveUserEmail={driveUser?.email}
+            docCount={documents.length}
+            passwordCount={lockerEntries.filter(e => e.type === 'password').length}
+            addressCount={lockerEntries.filter(e => e.type === 'address').length}
+            onOpenBiometrics={() => handleTriggerBiometricUnlock()}
+            onOpenProfileEdit={() => {
+              setEditingMember(currentUser);
+              setShowEditProfileModal(true);
+            }}
+            onOpenGeniusManager={() => setShowGeniusManagerModal(true)}
+            onOpenGoogleDrive={() => setShowGoogleDriveModal(true)}
+          />
+        </div>
+
+        {/* World News Highlights - Always Highlighting Amazing Subjects */}
+        <div className="mb-6">
+          <WorldNewsTicker lang={lang} />
+        </div>
+
         {/* Web Speech API Voice Command & Search Controller Bar */}
         <div className="mb-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3.5 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -616,8 +646,8 @@ const App: React.FC = () => {
                   ) : (
                     <span>
                       {lang === 'bn' 
-                        ? 'কথা বলুন: "ভল্ট", "আইনি উপদেষ্টা", "হটলাইন", "খুঁজুন বাবার এনআইডি", "পাসপোর্ট", "লক করো"' 
-                        : 'Say: "vault", "legal advisor", "hotlines", "search passport", "lock"'}
+                        ? 'কথা বলুন: "ভল্ট", "লকার", "আইনি উপদেষ্টা", "হটলাইন", "খুঁজুন বাবার এনআইডি", "পাসপোর্ট", "লক করো"' 
+                        : 'Say: "vault", "locker", "legal advisor", "hotlines", "search passport", "lock"'}
                     </span>
                   )}
                 </div>
@@ -626,6 +656,15 @@ const App: React.FC = () => {
 
             {/* Quick Voice Command Pills */}
             <div className="flex items-center space-x-1.5 overflow-x-auto scrollbar-none text-[11px] shrink-0 font-medium">
+              <button
+                onClick={() => {
+                  setCurrentTab('vault');
+                  setVaultDisplayMode('locker');
+                }}
+                className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+              >
+                লকার হাব
+              </button>
               <button
                 onClick={() => executeGlobalVoiceCommand('ভল্ট')}
                 className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300"
@@ -682,23 +721,99 @@ const App: React.FC = () => {
         )}
 
         {currentTab === 'vault' && (
-          <VaultView
-            documents={documents}
-            currentUser={currentUser}
-            members={members}
-            onAddDocument={handleAddDocument}
-            onTogglePin={handleTogglePin}
-            onToggleHide={handleToggleHide}
-            onDeleteDocument={handleDeleteDocument}
-            onRequestAccess={handleRequestAccess}
-            lang={lang}
-            isBiometricUnlocked={isBiometricUnlocked}
-            onTriggerBiometricUnlock={handleTriggerBiometricUnlock}
-            externalSearchQuery={vaultSearchQuery}
-            onSearchChange={setVaultSearchQuery}
-            onClearAllDemo={handleClearAllDemo}
-            onResetToDemo={handleResetToDemo}
-          />
+          <div className="space-y-6">
+            {/* View Mode Switcher Header: Locker Hub vs Classic Legal Vault */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-2xl shadow-sm">
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setVaultDisplayMode('locker')}
+                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 transition-all ${
+                    vaultDisplayMode === 'locker'
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                  <span>{lang === 'bn' ? 'পারিবারিক লকার হাব (পাসওয়ার্ড, ঠিকানা, ছবি, নথি)' : 'Family Locker Hub (All Media)'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVaultDisplayMode('detailed')}
+                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-2 transition-all ${
+                    vaultDisplayMode === 'detailed'
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>{lang === 'bn' ? 'ঐতিহ্যবাহী আইনি দলিলপত্র ভিউ' : 'Classic Legal Vault View'}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setShowGoogleDriveModal(true)}
+                  className="px-3 py-1.5 rounded-xl border border-sky-200 dark:border-sky-800/60 bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 text-xs font-semibold flex items-center space-x-1.5 hover:bg-sky-100 dark:hover:bg-sky-900/50"
+                >
+                  <HardDrive className="w-3.5 h-3.5 text-sky-500" />
+                  <span>{isDriveConnected ? (lang === 'bn' ? 'গুগল ড্রাইভ সক্রিয়' : 'Drive Active') : (lang === 'bn' ? 'গুগল ড্রাইভ এক্সপ্লোরার' : 'Google Drive')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowGeniusManagerModal(true)}
+                  className="px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center space-x-1.5 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+                >
+                  <Bot className="w-3.5 h-3.5 text-amber-600" />
+                  <span>{lang === 'bn' ? 'জিনিয়াস ম্যানেজার' : 'Genius Helping Manager'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Display Either Family Locker View or Classic Vault View */}
+            {vaultDisplayMode === 'locker' ? (
+              <FamilyLockerView
+                currentUser={currentUser}
+                members={members}
+                documents={documents}
+                lockerEntries={lockerEntries}
+                lang={lang}
+                isBiometricUnlocked={isBiometricUnlocked}
+                onOpenBiometrics={() => handleTriggerBiometricUnlock()}
+                onAddLockerEntry={handleAddLockerEntry}
+                onUpdateLockerEntry={handleUpdateLockerEntry}
+                onDeleteLockerEntry={handleDeleteLockerEntry}
+                onToggleHideEntry={handleToggleHideEntry}
+                onTogglePinEntry={handleTogglePinEntry}
+                onAddDocument={handleAddDocument}
+                onDeleteDocument={handleDeleteDocument}
+                onTogglePinDoc={handleTogglePin}
+                onToggleHideDoc={handleToggleHide}
+                onOpenGoogleDrive={() => setShowGoogleDriveModal(true)}
+                onClearBlank={handleClearAllDemo}
+                onResetDemo={handleResetToDemo}
+              />
+            ) : (
+              <VaultView
+                documents={documents}
+                currentUser={currentUser}
+                members={members}
+                onAddDocument={handleAddDocument}
+                onTogglePin={handleTogglePin}
+                onToggleHide={handleToggleHide}
+                onDeleteDocument={handleDeleteDocument}
+                onRequestAccess={handleRequestAccess}
+                lang={lang}
+                isBiometricUnlocked={isBiometricUnlocked}
+                onTriggerBiometricUnlock={handleTriggerBiometricUnlock}
+                externalSearchQuery={vaultSearchQuery}
+                onSearchChange={setVaultSearchQuery}
+                onClearAllDemo={handleClearAllDemo}
+                onResetToDemo={handleResetToDemo}
+              />
+            )}
+          </div>
         )}
 
         {currentTab === 'advisor' && (
@@ -894,6 +1009,45 @@ const App: React.FC = () => {
           isAdminViewing={currentUser.role === 'admin'}
         />
       )}
+
+      {/* Google Drive Workspace File Explorer & Importer Modal */}
+      {showGoogleDriveModal && (
+        <GoogleDriveExplorer
+          currentUser={currentUser}
+          lang={lang}
+          onImportToVault={handleImportDriveToVault}
+          onImportToLocker={handleImportDriveToLocker}
+          onClose={() => setShowGoogleDriveModal(false)}
+        />
+      )}
+
+      {/* Genius Helping Manager Realtime Agentic Assistant Modal */}
+      <GeniusHelpingManager
+        currentUser={currentUser}
+        lang={lang}
+        documents={documents}
+        lockerEntries={lockerEntries}
+        isBiometricUnlocked={isBiometricUnlocked}
+        isOpen={showGeniusManagerModal}
+        onClose={() => setShowGeniusManagerModal(false)}
+        onNavigateTab={(tab) => {
+          if (tab === 'locker') {
+            setCurrentTab('vault');
+            setVaultDisplayMode('locker');
+          } else {
+            setCurrentTab(tab);
+          }
+        }}
+        onSearchVault={(query) => {
+          setVaultSearchQuery(query);
+          setCurrentTab('vault');
+        }}
+        onTriggerBiometrics={() => handleTriggerBiometricUnlock()}
+        onOpenGoogleDrive={() => {
+          setShowGeniusManagerModal(false);
+          setShowGoogleDriveModal(true);
+        }}
+      />
 
     </div>
   );

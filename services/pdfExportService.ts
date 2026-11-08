@@ -224,7 +224,7 @@ export class PDFExportService {
     const centerY = height / 2;
 
     // Angle of 45 degrees
-    pdf.text('Maruf & Familys', centerX, centerY - 25, {
+    pdf.text('Maruf & Familys - Secure Vault', centerX, centerY - 25, {
       align: 'center',
       angle: 45,
     });
@@ -238,12 +238,12 @@ export class PDFExportService {
 
     // Secondary lighter top and bottom watermarks
     pdf.setFontSize(28);
-    pdf.text('Maruf & Familys', centerX - 30, centerY - 80, {
+    pdf.text('Maruf & Familys - Secure Vault', centerX - 30, centerY - 80, {
       align: 'center',
       angle: 45,
     });
 
-    pdf.text('Maruf & Familys', centerX + 30, centerY + 70, {
+    pdf.text('Maruf & Familys - Secure Vault', centerX + 30, centerY + 70, {
       align: 'center',
       angle: 45,
     });
@@ -288,3 +288,11 @@ export class PDFExportService {
     return y + 2;
   }
 }
+
+export const exportVaultDocumentToPDF = (
+  doc: VaultDocument,
+  _member?: any,
+  _lang?: any
+): { blob: Blob; url: string; filename: string } => {
+  return PDFExportService.generateDocumentPDF(doc);
+};

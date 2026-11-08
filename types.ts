@@ -185,6 +185,17 @@ export interface AIProviderConfig {
   agentTone: 'lawyer_advisor' | 'friendly_family' | 'detailed_researcher';
 }
 
+export interface NewsHeadline {
+  id: string;
+  title: string;
+  titleBn?: string;
+  summary: string;
+  url?: string;
+  publishedAt: string;
+  source: string;
+  isHighPriority: boolean;
+}
+
 declare global {
   interface Window {
     webkitSpeechRecognition?: any;

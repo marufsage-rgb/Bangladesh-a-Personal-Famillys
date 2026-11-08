@@ -121,6 +121,31 @@ export class AIAdvisorService {
     }
   }
 
+  static async askLegalAdvisor(
+    query: string,
+    lang: 'bn' | 'en' = 'bn',
+    documents: VaultDocument[] = []
+  ): Promise<{ text: string; referenceRules?: string[]; suggestedSteps?: string[] }> {
+    const docContext = documents.length > 0 
+      ? `\n\nপারিবারিক নথিসমূহ:\n${documents.map(d => `- ${d.title || d.titleBn} (${d.category})`).join('\n')}`
+      : '';
+    const prompt = `${query}${docContext}`;
+    const text = await this.sendChatMessage(prompt, [], DEFAULT_AI_CONFIG, lang);
+    return {
+      text,
+      referenceRules: [
+        'Registration Act 1908 (দলিল রেজিস্ট্রি আইন)',
+        'State Acquisition and Tenancy Act 1950 (নামজারি ও রেকর্ড সংশোধনী)',
+        'Muslim Personal Law (Shariat) Application Act 1937 (ওয়ারিশ বণ্টন)'
+      ],
+      suggestedSteps: [
+        'দলিলের মূল কপি ও খতিয়ানের সার্টিফাইড কপি ভল্টে স্ক্যান করে সংরক্ষণ করুন',
+        'ই-নামজারি ওয়েবসাইটে (mutation.land.gov.bd) রেকর্ড যাচাই করুন',
+        'জরুরি আইনি সহায়তায় সরকারি ভূমি হেল্পলাইন ১৬১২২ এ যোগাযোগ করুন'
+      ]
+    };
+  }
+
   static async analyzeDocument(doc: Partial<VaultDocument>, fileBase64?: string): Promise<NonNullable<VaultDocument['aiAnalysis']>> {
     const prompt = `
     Please conduct an expert forensic and legal audit for the following Bangladesh citizen/family document:
